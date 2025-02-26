@@ -1,0 +1,52 @@
+apiVersion: flink.apache.org/v1beta1
+kind: FlinkDeployment
+metadata:
+  name: flink-stevenmatison
+spec:
+  image: container.repository.cloudera.com/cloudera/flink:1.19.1-csaop1.1.2-b17
+  flinkVersion: v1_19
+  serviceAccount: flink
+  jobManager:
+    resource:
+      memory: 1024MB
+      cpu: 0.4
+  taskManager:
+    resource:
+      memory: 1024MB
+      cpu: 0.4
+  podTemplate:
+    spec:
+      imagePullSecrets:
+        - name: csa-secret
+      containers:
+        - name: flink-main-container
+          volumeMounts:
+            - name: flink-jars
+              mountPath: /opt/flink/jars
+              readOnly: true
+      initContainers:
+        - name: init-jar-downloader
+          image: appropriate/curl
+          args:
+            - "--output"
+            - "/opt/flink/jars/flink-kubernetes-tutorial-1.19.1-csaop1.1.2.jar"
+            - "http://demo-nginx-service.default.svc.cluster.local:31080/files/flink-kubernetes-tutorial-1.19.1-csaop1.1.2.jar"
+          volumeMounts:
+            - name: flink-jars
+              mountPath: /opt/flink/jars
+      volumes:
+        - name: flink-jars
+          emptyDir: {}
+##          persistentVolumeClaim:
+##            claimName: jarfile-pvc
+
+  job:
+    entryClass: com.cloudera.streaming.examples.flink.DataGeneratorJob
+    args:
+      - "--rowsPerSec"
+      - "10"
+    jarURI: local:///opt/flink/jars/flink-kubernetes-tutorial-1.19.1-csaop1.1.2.jar
+    parallelism: 1
+    state: running
+    upgradeMode: stateless
+

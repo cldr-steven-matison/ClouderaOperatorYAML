@@ -1,0 +1,100 @@
+apiVersion: cfm.cloudera.com/v1alpha1
+kind: Nifi
+metadata:
+  name: mynifi
+  namespace: cfm-operator
+spec:
+  stateManagement:
+   clusterProvider:
+     id: kubernetes-provider
+     class: org.apache.nifi.kubernetes.state.provider.KubernetesConfigMapStateProvider
+  replicas: 3
+  statefulset:
+    readinessProbe:
+      initialDelaySeconds: 10
+      periodSeconds: 60
+      failureThreshold: 60
+      timeoutSeconds: 30
+      successThreshold: 1
+    livenessProbe:
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      failureThreshold: 60
+      successThreshold: 1
+  image:
+    repository: container.repository.cloudera.com/cloudera/cfm-nifi-k8s
+    tag: 2.7.99-b18__min_dfx_2.7.0-nifi_1.25.0.2.3.13.0-17
+    pullPolicy: IfNotPresent
+    pullSecret: docker-pull-secret
+  tiniImage:
+    repository: container.repository.cloudera.com/cloudera/cfm-tini
+    tag: 2.7.99-b18
+    pullPolicy: IfNotPresent
+    pullSecret: docker-pull-secret
+  security:
+    initialAdminIdentity: anonymous
+    nodeCertGen:
+      issuerRef:
+        name: self-signed-ca-issuer
+        kind: ClusterIssuer
+    userCertAuth:
+      verificationCASecret: cert-manager/self-signed-ca
+  hostName: nifi.localhost # Will have no effect with uiConnection type Service
+  uiConnection:
+    type: Service
+  persistence:
+    size: 10Gi
+    storageClass: pod/local-path-provisioner-844bd8758f-dp6lw
+    contentRepo:
+      size: 10Gi
+      storageClass: pod/local-path-provisioner-844bd8758f-dp6lw
+    flowfileRepo:
+      size: 10Gi
+      storageClass: pod/local-path-provisioner-844bd8758f-dp6lw
+    provenanceRepo:
+      size: 10Gi
+      storageClass: pod/local-path-provisioner-844bd8758f-dp6lw
+  configOverride:
+    authorizers: |
+      <authorizers>
+        <authorizer>
+          <identifier>single-user-authorizer</identifier>
+          <class>org.apache.nifi.authorization.single.user.SingleUserAuthorizer</class>
+        </authorizer>
+      </authorizers>
+    loginIdentityProviders: |
+      <loginIdentityProviders>
+        <provider>
+          <identifier>single-user-provider</identifier>
+          <class>org.apache.nifi.authentication.single.user.SingleUserLoginIdentityProvider</class>
+          <property name="Username">test</property>
+          <property name="Password">$2b$10$W4yL2dEzaiQDBeX0zziFXuxKQCjUPXqUSgNKJJoraTCUQAhgiBvAS</property>
+        </provider>
+      </loginIdentityProviders>
+    nifiProperties:
+      upsert:
+        nifi.cluster.load.balance.connections.per.node: "1"
+        nifi.cluster.load.balance.max.thread.count: "4"
+        nifi.cluster.node.connection.timeout: "60 secs"
+        nifi.cluster.node.read.timeout: "60 secs"
+        nifi.cluster.leader.election.implementation: "KubernetesLeaderElectionManager"
+        nifi.security.user.authorizer: single-user-authorizer
+        nifi.security.user.login.identity.provider: single-user-provider
+    bootstrapConf:
+      upsert:
+        java.arg.2: -Xms2g
+        java.arg.3: -Xmx2g
+        java.arg.13: -XX:+UseConcMarkSweepGC
+  resources:
+    nifi:
+      requests:
+        cpu: "1"
+        memory: 4Gi
+      limits:
+        cpu: "4"
+        memory: 4Gi
+    log:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+

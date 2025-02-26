@@ -1,0 +1,21 @@
+apiVersion: cfm.cloudera.com/v1alpha1
+kind: Nifi
+metadata:
+  name: nifi-cluster
+spec:
+  replicas: 1
+  image:
+    repository: container.repository.cloudera.com/cloudera/cfm-nifi-k8s
+    tag: 2.9.0-b96-nifi_2.0.0.4.3.1.0-56
+    pullSecret: cfm-docker-pull-secret
+  tiniImage:
+    repository: container.repository.cloudera.com/cloudera/cfm-tini
+    tag: 2.9.0-b96
+    pullSecret: cfm-docker-pull-secret
+  nifiVersion: 2.0.0
+  hostName: nifi-cluster.dev.foundry.cloudera.com
+  uiConnection:
+    type: Ingress
+    serviceConfig:
+      sessionAffinity: ClientIP
+

@@ -1,0 +1,14 @@
+apiVersion: flink.apache.org/v1beta1
+kind: FlinkSessionJob
+metadata:
+  name: job-stevenmatison
+spec:
+  deploymentName: flink-cluster-stevenmatison
+  job:
+    entryClass: com.cloudera.streaming.examples.flink.DataGeneratorJob
+    args:
+      - "--rowsPerSec"
+      - "10"
+    jarURI: http://demo-nginx-service.default.svc.cluster.local:31080/files/flink-kubernetes-tutorial-1.19.1-csaop1.1.2.jar
+    parallelism: 1
+    upgradeMode: stateless

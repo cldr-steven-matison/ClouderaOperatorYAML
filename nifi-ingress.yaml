@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nifi-ingress
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: cfm.operator.nifi
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: mynifi-0
+                port:
+                  number: 8443

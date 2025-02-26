@@ -1,0 +1,38 @@
+apiVersion: cfm.cloudera.com/v1alpha1
+kind: Nifi
+metadata:
+  name: nifi-cluster
+spec:
+  replicas: 1
+  image:
+    repository: container.repository.cloudera.com/cloudera/cfm-nifi-k8s
+    tag: 2.9.0-b96-nifi_1.27.0.2.3.14.0-14
+    pullSecret: cfm-docker-pull-secret
+  tiniImage:
+    repository: container.repository.cloudera.com/cloudera/cfm-tini
+    tag: 2.9.0-b96
+    pullSecret: cfm-docker-pull-secret
+  persistence:
+    size: 1Gi
+    contentRepo:
+      size: 1Gi
+    flowfileRepo:
+      size: 1Gi
+    provenanceRepo:
+      size: 2Gi
+    data: {}
+  hostName: nifi-cluster.apps.sko-fy-2026.nblt.p1.openshiftapps.com
+  resources:
+    nifi:
+      requests:
+        cpu: "1"
+        memory: 2Gi
+      limits:
+        cpu: "4"
+        memory: 4Gi
+    log:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+  uiConnection:
+    type: Route

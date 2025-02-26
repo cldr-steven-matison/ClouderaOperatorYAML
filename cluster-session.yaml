@@ -1,0 +1,23 @@
+apiVersion: flink.apache.org/v1beta1
+kind: FlinkDeployment
+metadata:
+  name: flink-cluster-stevenmatison
+spec:
+  image: container.repository.cloudera.com/cloudera/flink:1.19.1-csaop1.1.2-b17
+  flinkVersion: v1_18
+#  flinkConfiguration:
+#    kubernetes.operator.user.artifacts.http.header: "Authorization:Basic YWRtaW46U3VwZXJzZWNyZXQx"
+  serviceAccount: flink
+  jobManager:
+    resource:
+      memory: 1024MB
+      cpu: 0.4
+  taskManager:
+    resource:
+      memory: 1024MB
+      cpu: 0.4
+  podTemplate:
+    spec:
+      imagePullSecrets:
+        - name: csa-secret
+

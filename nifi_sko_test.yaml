@@ -1,0 +1,54 @@
+apiVersion: cfm.cloudera.com/v1alpha1
+kind: Nifi
+metadata:
+  name: nifi
+spec:
+  replicas: 1
+  nifiVersion: 1.0.0
+  image:
+    repository: 327162129569.dkr.ecr.us-west-2.amazonaws.com/cfm-nifi-k8s
+    tag: '1'
+    pullSecret: cfm-docker-pull-secret
+    pullPolicy: Always
+  tiniImage:
+    repository: 327162129569.dkr.ecr.us-west-2.amazonaws.com/cfm-tini
+    tag: 2.9.0-b96
+    pullSecret: cfm-docker-pull-secret
+    pullPolicy: IfNotPresent
+  persistence:
+    size: 1Gi
+    contentRepo:
+      size: 1Gi
+    flowfileRepo:
+      size: 1Gi
+    provenanceRepo:
+      size: 2Gi
+    data: {}
+  security:
+    initialAdminIdentity: nifiadmin
+    nodeCertGen:
+      issuerRef:
+        name: self-signed-ca-issuer
+        kind: ClusterIssuer
+    singleUserAuth:
+      enabled: true
+      credentialsSecretName: creds
+  hostName: someuser-nifi.apps.cluster.domain
+  uiConnection:
+    type: Route
+    routeConfig:
+      tls:
+        termination: passthrough
+  resources:
+    nifi:
+      requests:
+        cpu: "1"
+        memory: 2Gi
+      limits:
+        cpu: "4"
+        memory: 4Gi
+    log:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+

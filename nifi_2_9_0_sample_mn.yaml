@@ -1,0 +1,51 @@
+apiVersion: cfm.cloudera.com/v1alpha1
+kind: Nifi
+metadata:
+  name: mynifi 
+spec:
+  replicas: 1
+  nifiVersion: 1.0.0
+  image:
+    repository: container.repository.cloudera.com/cloudera/cfm-nifi-k8s
+    tag: 2.9.0-b96-nifi_1.27.0.2.3.14.0-14
+    pullSecret: docker-pull-secret
+    pullPolicy: IfNotPresent
+  tiniImage:
+    repository: container.repository.cloudera.com/cloudera/cfm-tini
+    tag: 2.9.0-b96
+    pullSecret: docker-pull-secret
+    pullPolicy: IfNotPresent
+  persistence:
+    size: 1Gi
+    contentRepo:
+      size: 1Gi
+    flowfileRepo:
+      size: 1Gi
+    provenanceRepo:
+      size: 2Gi
+    data: {}
+  security:
+    initialAdminIdentity: nifiadmin
+    nodeCertGen:
+      issuerRef:
+        name: self-signed-ca-issuer
+        kind: ClusterIssuer
+    singleUserAuth:
+      enabled: true
+  hostName: nifi.io
+  uiConnection:
+    type: Ingress
+    annotations:
+      nginx.ingress.kubernetes.io/affinity: cookie
+      nginx.ingress.kubernetes.io/affinity-mode: persistent
+      nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+      nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  resources:
+    nifi:
+      requests:
+        cpu: "1"
+        memory: 2Gi
+      limits:
+        cpu: "4"
+        memory: 4Gi
