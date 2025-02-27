@@ -3,7 +3,7 @@ kind: Nifi
 metadata:
   name: mynifi
 spec:
-  replicas: 1
+  replicas: 2
   nifiVersion: 2.0.0
   image:
     repository: container.repository.cloudera.com/cloudera/cfm-nifi-k8s
@@ -30,6 +30,18 @@ spec:
     userCertAuth:
       verificationCASecret: cert-manager/self-signed-ca
   hostName: nifi.io
+  resources:
+    nifi:
+      requests:
+        cpu: "1"
+        memory: 2Gi
+      limits:
+        cpu: "4"
+        memory: 4Gi
+    log:
+      requests:
+        cpu: 50m
+        memory: 128Mi
   uiConnection:
     type: Ingress
     annotations:
