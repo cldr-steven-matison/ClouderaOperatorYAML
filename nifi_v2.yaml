@@ -3,7 +3,7 @@ kind: Nifi
 metadata:
   name: mynifi
 spec:
-  replicas: 2
+  replicas: 1
   nifiVersion: 2.0.0
   image:
     repository: container.repository.cloudera.com/cloudera/cfm-nifi-k8s
